@@ -1,96 +1,144 @@
 # Setup Prompt
 
-Two options depending on your setup:
+Two options depending on your setup.
 
-## Option A: If you have the playbook cloned locally
+## Option A: Full setup (recommended)
 
-Clone this repo alongside your project:
+Clone the playbook locally first:
 ```bash
 git clone https://github.com/Certified-Coach/claude-code-playbook.git ~/claude-code-playbook
 ```
 
-Then open your project in Claude Code and paste this:
+Then open your project directory in Claude Code and paste everything below the line:
 
 ---
 
-I'd like you to set up this project using the Claude Code Playbook. The playbook is cloned locally at ~/claude-code-playbook
+I'd like you to set up this project using the Claude Code Playbook at ~/claude-code-playbook
 
-Please:
+Please work through these phases in order. Complete each phase before moving to the next. Ask me questions when you need my input.
 
-1. Read the playbook's `START-HERE.md`, `templates/CLAUDE.md.template`, and `practices/memory/how-memory-works.md`
+## Phase 1: Interview
 
-2. Interview me to understand this project:
-   - What is this project? (name, one-line description)
-   - What problem does it solve? Who is it for?
-   - What's the tech stack? (or should we choose one together?)
-   - Am I working solo or in a team?
-   - What's the current state — brand new, or do I have existing context (strategy docs, research, designs)?
-   - What are the immediate priorities?
-   - What does the first release look like?
-
-3. Based on my answers, create these files:
-
-   **CLAUDE.md** in the repo root — adapted from the playbook template. Include:
-   - Operating mode
-   - Current release + targets (even if the first release is "set up the project")
-   - Project identity
-   - Tech stack
-   - Key conventions
-   - A starter docs trigger table
-
-   **Memory directory** at the appropriate path for this project. Create:
-   - `MEMORY.md` index file (from the playbook template)
-   - A `project_context.md` memory file capturing the project description, goals, and current state
-   - A `user_profile.md` memory file capturing who I am and my preferences
-   - If I have strategy documents or context to share, ask me to paste or point to them, then save the key decisions as project memory files
-
-   **Git configuration:**
-   - If this is a new repo, initialise it with `git init`
-   - Create `.githooks/pre-commit` with a basic lint check (adapt to the tech stack)
-   - Run `git config core.hooksPath .githooks`
-   - Create an initial `.gitignore` appropriate for the tech stack
-
-4. If this is a brand new project with no code:
-   - Help me choose a tech stack (or validate my choice) based on the project requirements
-   - Create the initial project scaffold (package.json, tsconfig, etc.)
-   - Set up the dev environment so I can run `dev`, `build`, and `test`
-   - Make the first commit: `META: initial project setup with Claude Code Playbook`
-
-5. If I have existing context (strategy docs, market research, personas, wireframes):
-   - Ask me to share them (paste text, point to files, or describe them)
-   - Extract key decisions, goals, constraints, and personas
-   - Save each as an appropriate memory file
-   - Reference them in CLAUDE.md where relevant
-
-6. Create the first release plan:
-   - Ask me what the first milestone is
-   - Create a simple release definition (even if it's just "R0: Project setup complete")
-   - Log 3-5 initial issues as a starter backlog (use `gh issue create` if we have GitHub set up)
-
-7. Summarise everything that was created and what to do next.
-
----
-
-## Option B: If you don't have the playbook cloned
-
-Paste this simpler version — Claude will work from the principles directly:
-
----
-
-I'd like to set up my project with structured working practices for Claude Code. The practices I want to adopt:
-
-1. **CLAUDE.md as the constitution** — a file in the repo root that loads every session with project context, conventions, and current priorities.
-
-2. **Memory system** — a file-based memory at `.claude/projects/` that persists decisions, feedback, and project state across conversations.
-
-3. **Release hierarchy** — Releases (business events) → Milestones (engineering targets) → Issues (work items). Every piece of work belongs to a release.
-
-4. **Docs alongside code** — if code changes, docs update in the same commit.
-
-5. **Pre-push audit** — before every push, verify: library-first, dependencies explicit, docs updated, gotchas captured.
-
-Please interview me about my project and set up these practices. Start by asking:
-- What is this project?
-- What's the tech stack?
-- What's the current state?
+Ask me:
+- What is this project? (name, one-line description)
+- What problem does it solve? Who is it for?
+- What's the tech stack? (or should we choose one together?)
+- Am I working solo or in a team?
+- Do I have existing context to feed in? (strategy docs, feature lists, research, wireframes)
+- What does the first release look like?
 - What are the immediate priorities?
+
+## Phase 2: Git + GitHub setup
+
+Based on my answers:
+
+1. **Initialise the repo** (if not already done): `git init`
+
+2. **Create GitHub repo** (if not already done):
+   ```
+   gh repo create [name] --public/--private --description "[description]"
+   ```
+
+3. **Create branch structure:**
+   - Create `staging` branch: `git checkout -b staging && git push -u origin staging`
+   - Set staging as the default PR target
+
+4. **Copy GitHub templates** from the playbook:
+   - Copy `templates/github/ISSUE_TEMPLATE/` to `.github/ISSUE_TEMPLATE/`
+   - Copy `templates/github/pull_request_template.md` to `.github/`
+   - These give us structured issue creation (feature, bug, engineering)
+
+5. **Create a GitHub Project board:**
+   ```
+   gh api graphql -f query='mutation { createProjectV2(input: { ownerId: "[owner-id]", title: "[Project Name]" }) { projectV2 { id number } } }'
+   ```
+   - Or guide me through creating it in the GitHub UI if the API is complex
+
+6. **Create initial milestones** based on the releases we discussed:
+   ```
+   gh api repos/[owner]/[repo]/milestones --method POST -f title="R0 — [name]" -f due_on="[date]"
+   ```
+   - Create one milestone per release we defined
+
+7. **Create initial labels** (if they don't exist):
+   - `enhancement`, `bug`, `documentation`, `engineering`, `design`, `security`
+
+## Phase 3: Project files
+
+1. **CLAUDE.md** — create from the playbook template, filled with my project's details. Include:
+   - Operating mode
+   - Current release + targets
+   - Project identity and tech stack
+   - Key conventions
+   - Starter docs trigger table
+   - Running the project commands
+
+2. **Memory system:**
+   - Create memory directory
+   - Create `MEMORY.md` index
+   - Create `project_context.md` — capture everything from the interview
+   - Create `user_profile.md` — my preferences, role, expertise
+   - If I shared strategy/feature docs, save key decisions as memory files
+
+3. **Git hooks:**
+   - Create `.githooks/pre-commit` with a basic quality check
+   - Run `git config core.hooksPath .githooks`
+
+4. **Documentation structure:**
+   - Create `docs/` directory with subdirectories: `design/`, `system/`, `reference/`
+   - Create a starter engineering plan from `templates/engineering-plan.md`
+   - Create a starter roadmap from `templates/roadmap.md`
+   - Populate both with the releases and priorities from our interview
+
+5. **`.gitignore`** appropriate for the tech stack
+
+## Phase 4: Secrets and environment
+
+1. **Check for 1Password CLI** (`op --version`) — if available, guide me through storing API keys
+2. **Create `.env.example`** listing required environment variables (no values)
+3. **Create `.env`** (gitignored) with placeholder values
+4. **Note any external services** that need accounts (hosting, database, auth, email)
+
+## Phase 5: Initial backlog
+
+1. **Create 5-10 starter issues** from our discussion, using the issue templates:
+   ```
+   gh issue create --title "FEAT: [title]" --body "[body]" --label enhancement --milestone "R0 — [name]"
+   ```
+2. **Add issues to the project board** if we created one
+3. **Prioritise** — which issue do we start with?
+
+## Phase 6: First commit
+
+1. Stage all created files
+2. Commit: `META: initialise project with Claude Code Playbook`
+3. Push to staging
+4. Verify GitHub has: repo, milestones, issues, project board, templates
+
+## Phase 7: Handover
+
+1. Show me the cheat sheet from `~/claude-code-playbook/CHEAT-SHEET.md`
+2. Summarise what was created
+3. Recommend what to build first based on the roadmap
+4. Ask: "Ready to start building?"
+
+---
+
+## Option B: Minimal setup (no playbook clone needed)
+
+Paste this into Claude Code if you don't want to clone the playbook repo:
+
+---
+
+I want to set up structured working practices for my project. Please:
+
+1. Interview me about my project (name, tech stack, priorities)
+2. Create a CLAUDE.md with project context, conventions, and current targets
+3. Set up a memory system for persistent decisions
+4. Create a GitHub repo with milestones, labels, issue templates, and a project board
+5. Create a starter engineering plan and roadmap
+6. Create 5-10 initial issues from our discussion
+7. Set up git hooks for quality gates
+8. Make the first commit
+
+Start by asking me about the project.
