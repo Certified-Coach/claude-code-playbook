@@ -53,6 +53,15 @@ A documentation and template repository. There is no application, no build step,
 
 ---
 
+## Tools
+
+| Command | Purpose | Usage |
+|---------|---------|-------|
+| `cc-snap` | Capture desktop screen | `cc-snap` → read `~/screenshot.png` |
+| `cc-snap -w` | Capture focused window | `cc-snap -w` → read `~/screenshot.png` |
+
+---
+
 ## Docs lookup — read BEFORE you act
 
 | If you're touching... | Read first |

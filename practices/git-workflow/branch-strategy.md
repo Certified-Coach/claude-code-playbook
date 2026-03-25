@@ -59,6 +59,16 @@ Use prefixes for traceability:
 | `DOCS:` | Documentation only |
 | `META:` | Project configuration, CI, tooling |
 
+## Dead branch guard
+
+The bash-guard includes a rule that blocks commits on branches whose PR has already been merged. This prevents Claude from continuing to work on a stale branch after its PR lands.
+
+**Why this exists:** Without this guard, Claude will happily keep committing on a merged branch. In one incident, 8+ commits spanning unrelated concerns (security, WCAG, rate limiting) ended up on a dead branch instead of being separate PRs. The written rules — "one concern per branch," "short-lived branches" — were documented but not followed. Mechanical enforcement is the fix.
+
+**How it works:** On every `git commit`, the guard checks `gh pr list --head <branch> --state merged`. If a merged PR exists, the commit is blocked with a message to create a new branch.
+
+**Fails open:** If `gh` is not installed, not authenticated, or GitHub is unreachable, the guard silently passes — no false blocks.
+
 ## PR discipline
 
 Every PR must have:

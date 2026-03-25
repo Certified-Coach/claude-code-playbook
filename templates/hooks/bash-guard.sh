@@ -59,6 +59,22 @@ if echo "$CMDS" | grep -qE '\bgit add\s+(-A|--all)\b' 2>/dev/null || \
   exit 2
 fi
 
+# ── Branch discipline ─────────────────────────────────────────
+
+# Block commits on branches whose PR was already merged.
+# Prevents Claude from continuing to pile commits on a dead branch
+# after its PR has been merged — forces a new branch for new work.
+if echo "$CMDS" | grep -qE '\bgit commit\b' 2>/dev/null; then
+  BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null) || true
+  if [ -n "$BRANCH" ] && [ "$BRANCH" != "staging" ] && [ "$BRANCH" != "main" ]; then
+    MERGED_PR=$(gh pr list --head "$BRANCH" --state merged --json number --jq '.[0].number' 2>/dev/null) || true
+    if [ -n "$MERGED_PR" ]; then
+      echo "BLOCKED: Branch '$BRANCH' already has a merged PR (#$MERGED_PR). Create a new branch for new work." >&2
+      exit 2
+    fi
+  fi
+fi
+
 # ── PR discipline ──────────────────────────────────────────────
 
 # ADAPT: Change 'staging' to your integration branch name

@@ -34,12 +34,51 @@ Ask me these questions one at a time. Wait for my answer before moving on:
 4. Public or private repo?
 5. What tech stack? (if you're unsure, tell me what you're building and I'll recommend one)
 6. Are you working solo or in a team?
-7. Do you have existing documents to feed in? (strategy docs, feature lists, research, wireframes, business plans — anything)
-8. What does "done" look like for the first version? What's the first thing users should be able to do?
+7. Will this project ship releases to users, or is it internal/documentation/config-only?
+8. Do you have existing documents to feed in? (strategy docs, feature lists, research, wireframes, business plans — anything)
+9. What does "done" look like for the first version? What's the first thing users should be able to do?
+
+## Phase 1b: Workflow profile
+
+Based on the interview answers, determine which workflow profile fits this project. Present the two options, explain what each includes, and recommend one — but let me choose.
+
+### Profile A: Structured delivery
+
+**Use when:** The project ships releases, has multiple concerns in flight, or benefits from PR-based review — regardless of team size. A solo developer building a SaaS product needs this just as much as a team of five.
+
+Includes:
+- **Staging branch** — `feature/ → staging → main` promotion workflow
+- **PR workflow** — all changes go through pull requests targeting staging
+- **Full bash-guard** — blocks direct push to main, enforces PR discipline, dead-branch guard
+- **Milestones and labels** — release tracking via GitHub milestones
+- **Issue templates and project board**
+
+### Profile B: Direct push
+
+**Use when:** The project is simple enough that PRs add overhead without value — documentation repos, config-only repos, internal tools with no deployment pipeline, or early prototypes that haven't reached release cadence yet.
+
+Includes:
+- **Push to main** — no staging branch, no PR workflow
+- **Reduced bash-guard** — keeps destructive-action guards (force push, reset --hard, clean -f, --no-verify, git add -A) but removes staging/PR rules and dead-branch guard
+- **No milestones or labels** (optional — can add later)
+- **No issue templates or project board** (optional — can add later)
+
+**Note:** Profile B projects can upgrade to Profile A later. If the project grows in complexity or starts shipping releases, re-run the relevant Phase 2 steps to add staging, labels, and milestones.
+
+### What both profiles share
+
+- CLAUDE.md as the constitution
+- Memory system
+- Session-start hook
+- Engineering plan and roadmap
+- Health check skills
+- Commit message prefixes
+
+**Tell me which profile you recommend and why, then let me confirm before continuing.**
 
 ## Phase 2: GitHub setup
 
-Based on my answers:
+Based on my answers and chosen workflow profile:
 
 1. **Initialise the repo:**
    ```bash
@@ -51,32 +90,32 @@ Based on my answers:
    gh repo create [name] --[public/private] --source=. --push --description "[description]"
    ```
 
-3. **Create staging branch:**
+3. **Create staging branch** *(Profile A only — skip for Profile B):*
    ```bash
    git checkout -b staging
    git push -u origin staging
    ```
 
-4. **Set up labels** from the playbook:
+4. **Set up labels** *(Profile A only — skip for Profile B, can be added later):*
    Read `~/claude-code-playbook/templates/github/labels.json` and create each label:
    ```bash
    gh label create "[name]" --color "[color]" --description "[desc]"
    ```
 
 5. **Copy templates** from the playbook to the project:
-   - `~/claude-code-playbook/templates/github/ISSUE_TEMPLATE/` → `.github/ISSUE_TEMPLATE/`
-   - `~/claude-code-playbook/templates/github/pull_request_template.md` → `.github/`
    - `~/claude-code-playbook/templates/github/workflows/ci.yml` → `.github/workflows/`
    - `~/claude-code-playbook/templates/github/workflows/hygiene.yml` → `.github/workflows/`
+   - *(Profile A only)* `~/claude-code-playbook/templates/github/ISSUE_TEMPLATE/` → `.github/ISSUE_TEMPLATE/`
+   - *(Profile A only)* `~/claude-code-playbook/templates/github/pull_request_template.md` → `.github/`
 
-6. **Create milestones:**
+6. **Create milestones** *(Profile A only — skip for Profile B, can be added later):*
    ```bash
    gh api repos/[owner]/[repo]/milestones --method POST -f title="R0 — [first release name]" -f description="[from interview]"
    gh api repos/[owner]/[repo]/milestones --method POST -f title="R1 — [second release name]"
    gh api repos/[owner]/[repo]/milestones --method POST -f title="R2 — [third release name]"
    ```
 
-7. **Create a project board:**
+7. **Create a project board** *(Profile A only — skip for Profile B):*
    Guide me through creating a GitHub Project (V2) via the UI if the API is complex, or create via API if possible.
 
 ## Phase 3: Project files
@@ -112,14 +151,76 @@ Based on my answers:
    - Copy `~/claude-code-playbook/templates/hooks/session-start.sh` → `.claude/hooks/session-start.sh`
    - Copy `~/claude-code-playbook/templates/hooks/settings.json` → `.claude/settings.json`
    - Make hooks executable: `chmod +x .claude/hooks/*.sh`
-   - These enforce: no push to main, no force push, no --admin bypass, no skipping hooks, release scope gate on every session
+   - **Profile A:** Use the full bash-guard as-is. It enforces: no push to main, no force push, no --admin bypass, no skipping hooks, dead-branch guard, PR discipline, release scope gate.
+   - **Profile B:** After copying, remove the following sections from `.claude/hooks/bash-guard.sh`:
+     - "Block push to main/master" (pushing to main is the workflow)
+     - "Branch discipline" / dead-branch guard (no PRs to check)
+     - "PR discipline" / `gh pr create` rules (no staging branch)
+     - Keep: force push block, destructive ops block, --no-verify block, specific file staging, --admin bypass block, release health gate
 
 6. **Health check skills:**
    - Read `~/claude-code-playbook/practices/sanitisation/skills-installer.md`
    - Install all 6 skills into `.claude/skills/`
    - These provide: `/health-check`, `/bloat-check`, `/dry-check`, `/security-check`, `/arch-check`, `/test-health`
 
-7. **Environment:**
+7. **Screenshot tool:**
+   - Install `cc-snap` for desktop screenshots: `cp ~/claude-code-playbook/extras/cc-snap.sh ~/.local/bin/cc-snap && chmod +x ~/.local/bin/cc-snap`
+   - Verify `~/.local/bin` is on PATH (it usually is on Ubuntu/macOS; if not, add it)
+   - Add to the project CLAUDE.md trigger table: `| cc-snap | Capture desktop screen | cc-snap → read ~/screenshot.png |`
+   - This lets Claude take and view screenshots on macOS, WSL, Windows (Git Bash), and Linux
+
+8. **Permissions — how autonomous should Claude be?**
+
+   The bash-guard hook (step 5) is your safety net — it blocks destructive commands before they execute. With the guard in place, you can safely give Claude broader permissions so it doesn't prompt you for every command.
+
+   Explain the three options and ask the user to choose:
+
+   **Option 1: Guarded autonomy (recommended)**
+   Claude can run any bash command and edit any file without prompting, but the bash-guard hook blocks dangerous operations. This is the best balance — fast iteration with mechanical safety.
+
+   Add to `.claude/settings.json`:
+   ```json
+   "permissions": {
+     "allow": [
+       "Bash",
+       "Read",
+       "Edit",
+       "Write",
+       "WebFetch(domain:*)"
+     ]
+   }
+   ```
+
+   **Option 2: Selective permissions**
+   Only pre-approve specific commands. Claude will still prompt for anything not listed. Good for teams that want tighter control.
+
+   Add to `.claude/settings.json`:
+   ```json
+   "permissions": {
+     "allow": [
+       "Read",
+       "Edit",
+       "Bash(git *)",
+       "Bash(npm *)",
+       "Bash(pnpm *)",
+       "Bash(cc-snap*)",
+       "Bash(ls *)",
+       "Bash(gh *)"
+     ]
+   }
+   ```
+   Adapt the list to the project's tech stack (e.g., `Bash(python *)`, `Bash(go *)`, `Bash(cargo *)`).
+
+   **Option 3: Default (prompt for everything)**
+   Claude asks permission for every bash command and file edit. Safe but slow. You can switch to Option 1 or 2 later by editing `.claude/settings.json`.
+
+   **Important notes to share with the user:**
+   - Permissions in `.claude/settings.json` are shared with the team (committed to git). Personal overrides go in `.claude/settings.local.json` (gitignored).
+   - `deny` rules always win over `allow` rules, at any scope.
+   - You can switch modes mid-session with `Shift+Tab`.
+   - The bash-guard hook runs regardless of permission level — even with full Bash allowed, destructive operations are still blocked.
+
+9. **Environment:**
    - Create `.gitignore` appropriate for the tech stack
    - Create `.env.example` listing any required environment variables
    - Create `.env` (ensure it's in .gitignore)
@@ -174,7 +275,9 @@ If this is a brand new project with no code:
 
 1. Stage everything: `git add -A`
 2. Commit: `git commit -m "META: initialise project with Claude Code Playbook"`
-3. Push: `git push origin staging`
+3. Push:
+   - **Profile A:** `git push origin staging`
+   - **Profile B:** `git push origin main`
 
 ## Phase 8: Handover
 
