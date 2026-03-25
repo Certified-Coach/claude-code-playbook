@@ -4,7 +4,7 @@ Opinionated working practices for building software with [Claude Code](https://c
 
 ## Getting started
 
-**You need:** Claude Code installed. That's it.
+**You need:** Claude Code 2.1.83+ installed. That's it.
 
 ```bash
 # 1. Clone this playbook
@@ -41,6 +41,8 @@ If you prefer to set things up manually, see [`PREREQUISITES.md`](PREREQUISITES.
 | CI workflow | Quality checks on push/PR (adapted to your stack) |
 | CLAUDE.md | Configured for your project — loaded every session |
 | Memory system | Persistent decisions, context, and preferences |
+| Claude Code hooks | 11 hooks: git safety, planning lifecycle, PR guards, edit guard, push/merge checklists |
+| Health check skills | 8 skills: /health-check, /bloat-check, /dry-check, /security-check, /arch-check, /test-health, /startup, /sanitise |
 | Git hooks | Pre-commit quality gate |
 | Engineering plan | Current state, release mapping |
 | Roadmap | Releases, timeline, audience rollout |
@@ -57,6 +59,8 @@ See [`CHEAT-SHEET.md`](CHEAT-SHEET.md) for what you can tell Claude after setup.
 | [Memory system](practices/memory/how-memory-works.md) | Decisions lost between sessions |
 | [Release hierarchy](practices/release-management/release-hierarchy.md) | Scope creep, no release plan |
 | [Branch strategy](practices/git-workflow/branch-strategy.md) | Messy git history, no preview |
+| [Planning lifecycle](practices/planning/planning-lifecycle.md) | Plans vanish when sessions end |
+| [Scope discipline](practices/planning/scope-discipline.md) | AI makes scope creep worse |
 | [Pre-push audit](practices/quality/pre-push-audit.md) | Quality drift on each push |
 | [Docs alongside code](practices/docs-alongside-code/pre-merge-doc-check.md) | Documentation that's always stale |
 

@@ -88,8 +88,8 @@ Claude reads the relevant docs and codebase to explain how something works, grou
 
 ## Code health
 
-**"Run a health check"**
-Claude runs all 6 health checks and produces a combined report with prioritised findings.
+**/startup**
+Session init — milestone progress, blockers, next task, git state. Auto-runs on session start via hook, or run manually anytime.
 
 **/health-check**
 Full check — bloat, duplication, security, architecture, test health. Run before releases.
@@ -109,8 +109,8 @@ Layer violations, N+1 queries, business logic placement. Run monthly.
 **/test-health**
 Coverage gaps, brittle tests, redundant tests. Run before releases.
 
-**"Run a full sanitisation"**
-Claude runs the complete 7-pass sanitisation process. See `practices/sanitisation/` for the full prompt sequence. Run before major releases or quarterly.
+**/sanitise**
+Full 7-pass codebase cleanup — 30 steps with review gates. Creates a release branch, runs all passes (dead code, duplication, security, architecture, bloat, test health), and produces a PR with delta metrics. Run before major releases or quarterly.
 
 ## Tips
 

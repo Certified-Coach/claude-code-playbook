@@ -41,15 +41,18 @@ Developers using Claude Code who want:
 
 ```
 templates/          Starter files — copy and adapt
+  hooks/            11 Claude Code hooks (git safety, planning, PR guards)
+  skills/           8 health check and workflow skills
+  github/           Issue templates, PR template, CI workflows, labels
 practices/          The playbook — process documentation
   memory/           How Claude's memory system works
+  planning/         Plan lifecycle, scope discipline
   git-workflow/     Branch strategy, commits, PRs
   release-management/ Releases → milestones → issues
-  testing/          E2E patterns, viewport testing
   docs-alongside-code/ Keep docs current with code
-  quality/          Pre-push audits, observability
-  founder-ops/      Operational dashboards (optional)
-extras/             Power-user tools — screenshots, CI, MCP servers
+  quality/          Pre-push audits, health cadence
+  sanitisation/     7-pass codebase cleanup with /sanitise skill
+extras/             Power-user tools — screenshots
 ```
 
 ## Principles

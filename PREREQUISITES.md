@@ -14,7 +14,9 @@ npm install -g @anthropic-ai/claude-code
 brew install claude-code
 ```
 
-Verify: `claude --version`
+Verify: `claude --version` — must be **2.1.83 or later** (required for `SessionStart` hook).
+
+If your version is older: `claude update`
 
 You need a Claude account with Claude Code access. See [claude.com/claude-code](https://claude.com/claude-code).
 
