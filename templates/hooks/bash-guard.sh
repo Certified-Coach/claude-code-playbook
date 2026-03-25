@@ -59,6 +59,21 @@ if echo "$CMDS" | grep -qE '\bgit add\s+(-A|--all)\b' 2>/dev/null || \
   exit 2
 fi
 
+# ── Branch safety ─────────────────────────────────────────────
+
+# Block switching to staging/main with uncommitted work on an issue branch
+if echo "$CMDS" | grep -qE '\bgit (checkout|switch)\s+(staging|main)\b' 2>/dev/null; then
+  CURRENT=$(git branch --show-current 2>/dev/null || echo "")
+  ISSUE_NUM=$(echo "$CURRENT" | grep -oE '^[0-9]+' || echo "")
+  if [ -n "$ISSUE_NUM" ]; then
+    DIRTY=$(git status --porcelain 2>/dev/null | wc -l | tr -d ' ')
+    if [ "$DIRTY" -gt 0 ]; then
+      echo "BLOCKED: ${DIRTY} uncommitted file(s) on issue branch ${CURRENT}. Commit or stash before switching." >&2
+      exit 2
+    fi
+  fi
+fi
+
 # ── Branch discipline ─────────────────────────────────────────
 
 # Block commits on branches whose PR was already merged.

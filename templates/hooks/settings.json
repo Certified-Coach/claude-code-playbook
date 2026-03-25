@@ -9,7 +9,7 @@
         ]
     },
     "hooks": {
-        "UserPromptSubmit": [
+        "SessionStart": [
             {
                 "hooks": [
                     {
@@ -26,6 +26,69 @@
                     {
                         "type": "command",
                         "command": ".claude/hooks/bash-guard.sh"
+                    },
+                    {
+                        "type": "command",
+                        "command": ".claude/hooks/on-commit-check-planning.sh"
+                    },
+                    {
+                        "type": "command",
+                        "command": ".claude/hooks/pre-pr-create.sh"
+                    },
+                    {
+                        "type": "command",
+                        "command": ".claude/hooks/pre-push.sh"
+                    },
+                    {
+                        "type": "command",
+                        "command": ".claude/hooks/pre-merge.sh"
+                    }
+                ]
+            },
+            {
+                "matcher": "EnterPlanMode",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": ".claude/hooks/pre-enter-plan.sh"
+                    }
+                ]
+            },
+            {
+                "matcher": "Edit|Write",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": ".claude/hooks/pre-edit-write.sh"
+                    }
+                ]
+            },
+            {
+                "matcher": "mcp__github__create_pull_request",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": ".claude/hooks/mcp-pr-guard.sh"
+                    }
+                ]
+            }
+        ],
+        "PostToolUse": [
+            {
+                "matcher": "EnterPlanMode",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": ".claude/hooks/on-enter-plan.sh"
+                    }
+                ]
+            },
+            {
+                "matcher": "ExitPlanMode",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": ".claude/hooks/on-exit-plan.sh"
                     }
                 ]
             }
